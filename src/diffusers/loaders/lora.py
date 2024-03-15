@@ -126,6 +126,7 @@ class LoraLoaderMixin:
             low_cpu_mem_usage=low_cpu_mem_usage,
             adapter_name=adapter_name,
             _pipeline=self,
+            **kwargs
         )
         self.load_lora_into_text_encoder(
             state_dict,
@@ -137,6 +138,7 @@ class LoraLoaderMixin:
             low_cpu_mem_usage=low_cpu_mem_usage,
             adapter_name=adapter_name,
             _pipeline=self,
+            **kwargs
         )
 
     @classmethod
@@ -378,7 +380,7 @@ class LoraLoaderMixin:
 
     @classmethod
     def load_lora_into_unet(
-        cls, state_dict, network_alphas, unet, low_cpu_mem_usage=None, adapter_name=None, _pipeline=None
+        cls, state_dict, network_alphas, unet, low_cpu_mem_usage=None, adapter_name=None, _pipeline=None, **kwargs
     ):
         """
         This will load the LoRA layers specified in `state_dict` into `unet`.
@@ -451,6 +453,8 @@ class LoraLoaderMixin:
                     rank[key] = val.shape[1]
 
             lora_config_kwargs = get_peft_kwargs(rank, network_alphas, state_dict, is_unet=True)
+            if "use_dora" in kwargs:
+                lora_config_kwargs["use_dora"] = kwargs["use_dora"]
             lora_config = LoraConfig(**lora_config_kwargs)
 
             # adapter_name
@@ -495,6 +499,7 @@ class LoraLoaderMixin:
         low_cpu_mem_usage=None,
         adapter_name=None,
         _pipeline=None,
+        **kwargs
     ):
         """
         This will load the LoRA layers specified in `state_dict` into `text_encoder`
@@ -572,6 +577,9 @@ class LoraLoaderMixin:
                     }
 
                 lora_config_kwargs = get_peft_kwargs(rank, network_alphas, text_encoder_lora_state_dict, is_unet=False)
+                if "use_dora" in kwargs:
+                    lora_config_kwargs["use_dora"] = kwargs["use_dora"]
+
                 lora_config = LoraConfig(**lora_config_kwargs)
 
                 # adapter_name
